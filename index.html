@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Jump</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>Mini Jump</h1>
+
+            <div class="score-board">
+                <div>
+                    <span> SCORE </span>
+                    <strong id="score">0</strong>
+                </div>
+                <div>
+                    <span> BEST </span>
+                    <strong id="best-score">0</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="game-area">
+            <div class="start-screen" id="start-screen">
+                <h2>Ready to jump?</h2>
+                <p>Help your kitty avoid obstacles!</p>
+                <button id="start-btn">Play Game</button>
+            </div>
+
+            <div class="cat" id="cat">🐱</div>
+
+            <div class="ground"></div>
+        </section>
+
+        <p class="instructions">
+            Press SPACE or click to jump!
+        </p>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
