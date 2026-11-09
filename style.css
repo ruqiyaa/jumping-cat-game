@@ -162,3 +162,112 @@ button:hover {
   font-size: 14px;
   font-weight: 500;
 }
+
+
+/*.  jumping   */
+
+.cat.jump {
+    animation: cat-jump 600ms ease;
+}
+@keyframes cat-jump {
+    0% {
+        transform: translateY(0);
+    }
+    45% {
+        transform: translateY(-140px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+
+.start-screen.hidden {
+    display: none;
+}
+
+/* Obstacles */
+
+.obstacle {
+    position: absolute;
+    bottom: 35px;
+    z-index: 1;
+    animation: obstacle-move 3.4s linear forwards;
+}
+@keyframes obstacle-move {
+    from {
+        left: calc(100% + 20px);
+    }
+    to{
+        left: -60px;
+    }
+}
+
+/*. Plant. */
+
+.plant {
+    width: 40px;
+    height: 50px;
+}
+.plant .stem {
+    position: absolute;
+    bottom: 0;
+    left: 17px;
+    width: 6px;
+    height: 35px;
+    background: #65ad70;
+    border-radius: 6px;
+}
+.plant .leaf {
+    position: absolute;
+    bottom: 18px;
+    width: 20px;
+  height: 12px;
+  background: #83ce8c;
+  border-radius: 100% 0 100% 0;
+}
+
+.plant .leaf.left {
+  left: 0;
+  transform: rotate(20deg);
+}
+
+.plant .leaf.right {
+  right: 0;
+  transform: rotate(70deg);
+}
+
+/* Mushroom */
+
+.mushroom {
+  width: 44px;
+  height: 46px;
+}
+
+.mushroom .cap {
+  position: absolute;
+  top: 0;
+  width: 44px;
+  height: 25px;
+  background: #f58fa8;
+  border-radius: 24px 24px 8px 8px;
+}
+
+.mushroom .stem {
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  width: 16px;
+  height: 25px;
+  background: #fff0d8;
+  border-radius: 7px;
+}
+
+/* Rock */
+
+.rock {
+  width: 45px;
+  height: 30px;
+  background: #aaa5b5;
+  border-radius: 55% 45% 35% 30%;
+}
