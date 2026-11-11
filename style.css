@@ -136,10 +136,65 @@ button:hover {
 
 .cat {
   position: absolute;
-  bottom: 35px;
-  left: 65px;
-  font-size: 60px;
-  z-index: 1;
+  bottom: 24px;
+  left: 50px;
+  width: 156px;
+  height: 156px;
+  z-index: 2;
+}
+
+.cat-sprite {
+    width: 100%;
+    height: 100%;
+
+    background-image: url("assets/cat-idle.png");
+    background-repeat: no-repeat;
+    background-size: 780px 156px;
+
+    animation: cat-idle-frames 1s steps(5) infinite;
+    image-rendering: pixelated;
+}
+
+/* Idle animation: 5 frames */
+@keyframes cat-idle-frames {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: -780px 0;
+  }
+}
+
+/* Jumping: move the entire cat */
+.cat.jump {
+  animation: cat-hop 850ms linear;
+}
+
+/* Jumping: change the cat's pose */
+.cat.jump .cat-sprite {
+  background-image: url("assets/cat-jump.png");
+  background-size: 2028px 156px;
+
+  animation: cat-jump-frames 850ms steps(13) 1;
+}
+
+/* 13-frame jumping animation */
+@keyframes cat-jump-frames {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: -2028px 0;
+  }
+}
+
+.cat img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 /* Ground */
@@ -166,20 +221,53 @@ button:hover {
 
 /*.  jumping   */
 
-.cat.jump {
-    animation: cat-jump 600ms ease;
+
+@keyframes cat-hop {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  10% {
+    transform: translate(10px, -35px);
+  }
+
+  20% {
+    transform: translate(22px, -75px);
+  }
+
+  30% {
+    transform: translate(35px, -115px);
+  }
+
+  40% {
+    transform: translate(48px, -145px);
+  }
+
+  50% {
+    transform: translate(60px, -165px);
+  }
+
+  60% {
+    transform: translate(65px, -145px);
+  }
+
+  70% {
+    transform: translate(58px, -110px);
+  }
+
+  80% {
+    transform: translate(40px, -70px);
+  }
+
+  90% {
+    transform: translate(20px, -30px);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
 }
-@keyframes cat-jump {
-    0% {
-        transform: translateY(0);
-    }
-    45% {
-        transform: translateY(-140px);
-    }
-    100% {
-        transform: translateY(0);
-    }
-}
+
 
 
 .start-screen.hidden {
@@ -203,71 +291,60 @@ button:hover {
     }
 }
 
-/*. Plant. */
+
+/* Common obstacle styling */
+
+.obstacle img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+/* Plant */
 
 .plant {
-    width: 40px;
-    height: 50px;
-}
-.plant .stem {
-    position: absolute;
-    bottom: 0;
-    left: 17px;
-    width: 6px;
-    height: 35px;
-    background: #65ad70;
-    border-radius: 6px;
-}
-.plant .leaf {
-    position: absolute;
-    bottom: 18px;
-    width: 20px;
-  height: 12px;
-  background: #83ce8c;
-  border-radius: 100% 0 100% 0;
-}
-
-.plant .leaf.left {
-  left: 0;
-  transform: rotate(20deg);
-}
-
-.plant .leaf.right {
-  right: 0;
-  transform: rotate(70deg);
+    width: 52px;
+    height: 64px;
 }
 
 /* Mushroom */
 
 .mushroom {
-  width: 44px;
-  height: 46px;
-}
-
-.mushroom .cap {
-  position: absolute;
-  top: 0;
-  width: 44px;
-  height: 25px;
-  background: #f58fa8;
-  border-radius: 24px 24px 8px 8px;
-}
-
-.mushroom .stem {
-  position: absolute;
-  bottom: 0;
-  left: 14px;
-  width: 16px;
-  height: 25px;
-  background: #fff0d8;
-  border-radius: 7px;
+    width: 52px;
+    height: 62px;
 }
 
 /* Rock */
 
 .rock {
-  width: 45px;
-  height: 30px;
-  background: #aaa5b5;
-  border-radius: 55% 45% 35% 30%;
+    width: 58px;
+    height: 55px;
+}
+
+
+/* Coins */
+
+.coin {
+    position: absolute;
+    bottom: 125px;
+    left: calc(100% + 20px);
+
+    width: 48px;
+    height: 48px;
+
+    z-index: 1;
+
+    animation: obstacle-move 3.4s linear forwards;
+}
+
+.coin img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    image-rendering: pixelated;
+    pointer-events: none;
 }
