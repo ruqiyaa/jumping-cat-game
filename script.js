@@ -80,6 +80,8 @@ startButton.addEventListener("click", (event) => {
 
     //start new game
     isPlaying = true;
+    updateGroundSpeed();
+    gameArea.classList.add("running");
     startScreen.classList.add("hidden");
 
     createObstacle();
@@ -117,6 +119,7 @@ cat.addEventListener("animationend", (event) => {
         addScore();
         if (jumpsCompleted % 10 === 0){
             obstacleDuration = Math.max(2.8, obstacleDuration -0.15);
+            updateGroundSpeed();
         }
     }
 });
@@ -188,10 +191,10 @@ function checkCollision() {
     const catBounds = cat.getBoundingClientRect();
     // Create a smaller hitbox for the cat
     const catRect = {
-        left: catBounds.left + 28,
-        right: catBounds.right - 28,
-        top: catBounds.top + 22,
-        bottom: catBounds.bottom - 18
+        left: catBounds.left + 34,
+        right: catBounds.right - 34,
+        top: catBounds.top + 28,
+        bottom: catBounds.bottom - 22
     };
 
     const obstacles = gameArea.querySelectorAll(".obstacle");
@@ -201,10 +204,10 @@ function checkCollision() {
 
         // Create a smaller hitbox for the obstacle
         const obstacleRect = {
-            left: bounds.left + bounds.width * 0.12,
-            right: bounds.right - bounds.width * 0.12,
-            top: bounds.top + bounds.height * 0.12,
-            bottom: bounds.bottom - bounds.height * 0.08
+            left: bounds.left + bounds.width * 0.18,
+            right: bounds.right - bounds.width * 0.18,
+            top: bounds.top + bounds.height * 0.18,
+            bottom: bounds.bottom - bounds.height * 0.12
         };
         const isColliding = 
             catRect.left < obstacleRect.right &&
@@ -248,6 +251,7 @@ function checkCollision() {
 
 function endGame() {
     isPlaying = false;
+    gameArea.classList.remove("running");
     clearInterval(obstacleTimer);
     clearInterval(collisionTimer);
     clearInterval(coinTimer);
@@ -278,4 +282,22 @@ function addScore(points=1) {
         bestScoreElement.textContent = bestScore;
         localStorage.setItem("kittenJumpBestScore", bestScore);
     }
+}
+
+
+function updateGroundSpeed() {
+
+    const groundTileWidth = 640.72;
+
+    // Distance an obstacle travels across the game
+    const obstacleDistance = gameArea.clientWidth + 80;
+
+    // Keep ground speed proportional to obstacle speed
+    const groundDuration =
+        (groundTileWidth * obstacleDuration) / obstacleDistance;
+
+    gameArea.style.setProperty(
+        "--ground-duration",
+        `${groundDuration}s`
+    );
 }
