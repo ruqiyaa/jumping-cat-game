@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -27,9 +28,19 @@
                     <strong id="coins">0</strong>
                 </div>
             </div>
+            <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="true">
+                Sound: ON
+            </button>
         </header>
 
         <section class="game-area">
+            <div class="mountain-layer" aria-hidden="true"></div>
+            
+            <div class="cloud-layer" aria-hidden="true">
+                <div class="cloud cloud-one"></div>
+                <div class="cloud cloud-two"></div>
+                <div class="cloud cloud-three"></div>
+            </div>
             <div class="start-screen" id="start-screen">
                 <h2>Ready to jump?</h2>
                 <p>Help your kitty avoid obstacles!</p>
@@ -44,7 +55,13 @@
         </section>
 
         <p class="instructions">
-            Press SPACE or click to jump!
+            <span class="desktop-instruction">
+                Press SPACE or click to jump!
+            </span>
+
+            <span class="mobile-instruction">
+                Tap anywhere in the game to jump!
+            </span>
         </p>
     </main>
     <script src="script.js"></script>

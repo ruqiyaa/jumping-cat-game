@@ -13,6 +13,9 @@ body {
   justify-content: center;
   align-items: center;
   padding: 30px 0;
+  -webkit-tap-highlight-color: transparent;
+user-select: none;
+touch-action: manipulation;
 }
 
 .game-container {
@@ -67,12 +70,52 @@ body {
 /* Game world */
 
 .game-area {
+    /* GAME WORLD DIMENSIONS — DESKTOP */
+
+--cat-size: 156px;
+--cat-bottom: 65px;
+
+--idle-sheet-width: 780px;
+--idle-frame-end: -780px;
+
+--jump-sheet-width: 2028px;
+--jump-frame-end: -1872px;
+
+--jump-y-15: -45px;
+--jump-y-30: -105px;
+--jump-y-50: -165px;
+--jump-y-70: -120px;
+--jump-y-85: -50px;
+
+--ground-height: 90px;
+--ground-tile-width: 640.72px;
+--ground-scroll-distance: -640.72px;
+
+--obstacle-bottom: 65px;
+
+--plant-width: 85px;
+--plant-height: 90px;
+
+--mushroom-width: 75px;
+--mushroom-height: 78px;
+
+--rock-width: 85px;
+--rock-height: 70px;
+
+--coin-size: 48px;
+--coin-bottom: 125px;
+--jump-duration: 950ms;
+--mountain-height: 220px;
+--mountain-tile-width: 640px;
+--mountain-scroll-distance: -640px;
+
   height: 420px;
   background: linear-gradient(
     to bottom,
-    #bce8ff 0%,
-    #dff4ff 70%,
-  );
+    #86c9f2 0%,
+    #a9dcf8 55%,
+    #c5e8fb 100%
+);
   border: 5px solid white;
   border-radius: 25px;
   position: relative;
@@ -133,75 +176,99 @@ button:hover {
 /* Temporary character */
 
 .cat {
-  position: absolute;
-  bottom: 72px;
-  left: 50px;
-  width: 156px;
-  height: 156px;
-  z-index: 2;
+    position: absolute;
+    bottom: var(--cat-bottom);
+    left: 50px;
+    width: var(--cat-size);
+    height: var(--cat-size);
+    z-index: 2;
 }
 
 .cat-sprite {
     width: 100%;
     height: 100%;
-
     background-image: url("assets/cat-idle.png");
     background-repeat: no-repeat;
-    background-size: 780px 156px;
-    background-position: 0 0;
-    animation: cat-idle-frames 1s steps(5) infinite;
+    background-size: var(--idle-sheet-width) var(--cat-size);
     image-rendering: pixelated;
+    animation: cat-idle-frames 1s steps(5) infinite;
 }
 
-/* Idle animation: 5 frames */
 @keyframes cat-idle-frames {
-  from {
-    background-position: 0 0;
-  }
+    from {
+        background-position: 0 0;
+    }
 
-  to {
-    background-position: -780px 0;
-  }
+    to {
+        background-position: var(--idle-frame-end) 0;
+    }
 }
 
 /* Jumping: move the entire cat */
 .cat.jump {
-  animation: cat-hop 950ms linear 1;
+    animation: cat-hop var(--jump-duration) linear 1;
 }
+
 @keyframes cat-hop {
-    0%   { transform: translateY(0); }
-    15%  { transform: translateY(-45px); }
-    30%  { transform: translateY(-105px); }
-    50%  { transform: translateY(-165px); }
-    70%  { transform: translateY(-120px); }
-    85%  { transform: translateY(-50px); }
-    100% { transform: translateY(0); }
+    0% {
+        transform: translateY(0);
+    }
+
+    15% {
+        transform: translateY(-29%);
+    }
+
+    30% {
+        transform: translateY(-67%);
+    }
+
+    50% {
+        transform: translateY(-106%);
+    }
+
+    70% {
+        transform: translateY(-77%);
+    }
+
+    85% {
+        transform: translateY(-32%);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
 }
 
 /* Jumping: change the cat's pose */
 .cat.jump .cat-sprite {
-  background-image: url("assets/cat-jump.png");
-  background-size: 2028px 156px;
-
-  animation: cat-jump-frames 950ms steps(12) 1 ;
+    background-image: url("assets/cat-jump.png");
+    background-size: var(--jump-sheet-width) var(--cat-size);
+    animation: cat-jump-frames var(--jump-duration) steps(12) 1 both;
 }
+
 @keyframes cat-jump-frames {
-    from { background-position: 0 0; }
-    to   { background-position: -1872px 0; }
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: var(--jump-frame-end) 0;
+    }
 }
 
 /* Ground */
 
 .ground {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 90px;
-  background-image: url("assets/mini-jump-ground.png");
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--ground-height);
+
+    background-image: url("assets/mini-jump-ground.png");
     background-repeat: repeat-x;
     background-position: left bottom;
-    background-size: auto 90px;
+    background-size: auto var(--ground-height);
 
     image-rendering: pixelated;
     z-index: 1;
@@ -221,7 +288,7 @@ button:hover {
     }
 
     to {
-        background-position-x: -640.72px;
+        background-position-x: var(--ground-scroll-distance);
     }
 }
 
@@ -244,9 +311,24 @@ button:hover {
 
 .obstacle {
     position: absolute;
-    bottom: 65px;
+    bottom: var(--obstacle-bottom);
     z-index: 1;
     animation: obstacle-move 3.4s linear forwards;
+}
+
+.plant {
+    width: var(--plant-width);
+    height: var(--plant-height);
+}
+
+.mushroom {
+    width: var(--mushroom-width);
+    height: var(--mushroom-height);
+}
+
+.rock {
+    width: var(--rock-width);
+    height: var(--rock-height);
 }
 @keyframes obstacle-move {
     from {
@@ -270,37 +352,15 @@ button:hover {
 }
 
 
-
-/* Plants */
-.plant {
-    width: 85px;
-    height: 90px;
-}
-
-/* Mushrooms */
-.mushroom {
-    width: 75px;
-    height: 78px;
-}
-
-/* Rocks */
-.rock {
-    width: 85px;
-    height: 70px;
-}
-
 /* Coins */
 
 .coin {
     position: absolute;
-    bottom: 125px;
+    bottom: var(--coin-bottom);
     left: calc(100% + 20px);
-
-    width: 48px;
-    height: 48px;
-
+    width: var(--coin-size);
+    height: var(--coin-size);
     z-index: 1;
-
     animation: obstacle-move 3.4s linear forwards;
 }
 
@@ -311,4 +371,524 @@ button:hover {
     display: block;
     image-rendering: pixelated;
     pointer-events: none;
+}
+
+
+
+/* BACKGROUND CLOUDS */
+
+.cloud-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+
+/* CLOUD BASE */
+
+.cloud {
+    position: absolute;
+    width: 160px;
+    height: 75px;
+    background: transparent;
+    opacity: 1;
+    left: 100%;
+
+    /* Soft shadow underneath each cloud */
+    filter: drop-shadow(
+        0 5px 4px rgba(67, 112, 145, 0.22)
+    );
+}
+
+/* Bottom body — slightly darker */
+.cloud::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 34px;
+
+    background: #e3edf5;
+    border-radius: 40px;
+
+    box-shadow:
+        inset 0 -5px 0 rgba(128, 157, 180, 0.16);
+}
+
+/* Upper fluffy parts — gentle shading */
+.cloud::after {
+    content: "";
+    position: absolute;
+    left: 48px;
+    bottom: 12px;
+
+    width: 65px;
+    height: 58px;
+
+    background: linear-gradient(
+        to bottom,
+        #f8fbfe 0%,
+        #f0f5f9 65%,
+        #e1ebf3 100%
+    );
+
+    border-radius: 50%;
+
+    box-shadow:
+        -37px 15px 0 -10px #edf3f8,
+        42px 15px 0 -12px #e8f0f6;
+}
+
+
+/* Cloud positions and variations */
+
+.cloud-one {
+    top: 55px;
+    transform: scale(1.15);
+}
+
+.cloud-two {
+    top: 155px;
+    transform: scale(0.8);
+}
+
+.cloud-three {
+    top: 35px;
+    transform: scale(1.3);
+}
+
+/* Clouds drift only during gameplay */
+
+
+/* All clouds travel right to left */
+
+.game-area.running .cloud {
+    animation: cloud-drift 44s linear infinite;
+}
+
+.game-area.running .cloud-two {
+    animation-delay: -14s;
+}
+
+.game-area.running .cloud-three {
+    animation-delay: -28s;
+}
+
+@keyframes cloud-drift {
+    from {
+        translate: 0 0;
+    }
+
+    to {
+        translate: -1300px 0;
+    }
+}
+
+
+.sound-toggle {
+    background: #7897b5;
+    padding: 10px 15px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.sound-toggle:hover {
+    background: #617f9e;
+}
+
+/* MOUNTAIN BACKGROUND */
+
+.mountain-layer {
+    position: absolute;
+    left: 0;
+    bottom: calc(var(--ground-height) - 14px);
+
+    width: 100%;
+    height: var(--mountain-height);
+
+    background-image: url("assets/mini-jump-mountains.png");
+    background-repeat: repeat-x;
+    background-position: left bottom;
+    background-size:
+        var(--mountain-tile-width)
+        var(--mountain-height);
+
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Move mountains slowly during gameplay */
+
+.game-area.running .mountain-layer {
+    animation: mountain-scroll var(--mountain-duration, 10s) linear infinite;
+}
+
+@keyframes mountain-scroll {
+    from {
+        background-position-x: 0;
+    }
+
+    to {
+        background-position-x: var(--mountain-scroll-distance);
+    }
+}
+
+
+
+
+/* MOBILE INSTRUCTIONS */
+
+.mobile-instruction {
+    display: none;
+}
+
+/* TABLETS AND MOBILE */
+
+@media (max-width: 680px) {
+
+    body {
+        align-items: flex-start;
+        padding: 16px 0 24px;
+    }
+
+    .game-container {
+        width: calc(100% - 24px);
+    }
+
+    /* Header layout */
+
+    .game-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: 10px;
+        row-gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .game-header h1 {
+        font-size: clamp(25px, 7vw, 32px);
+        letter-spacing: -1px;
+    }
+
+    /* Score cards */
+
+    .score-board {
+        grid-column: 1 / -1;
+        grid-row: 2;
+
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+
+        width: 100%;
+        gap: 8px;
+    }
+
+    .score-board div {
+        min-width: 0;
+        padding: 9px 6px;
+        border-radius: 12px;
+    }
+
+    .score-board span {
+        font-size: 9px;
+        letter-spacing: 0.5px;
+    }
+
+    .score-board strong {
+        font-size: 19px;
+    }
+
+    /* Sound button */
+
+    .sound-toggle {
+        grid-column: 2;
+        grid-row: 1;
+        padding: 9px 11px;
+        font-size: 12px;
+    }
+
+    /* Game area */
+
+    .game-area {
+    --cat-size: 112px;
+    --cat-bottom: 58px;
+
+    --idle-sheet-width: 560px;
+    --idle-frame-end: -560px;
+
+    --jump-sheet-width: 1456px;
+    --jump-frame-end: -1344px;
+
+    --jump-y-15: -32px;
+    --jump-y-30: -75px;
+    --jump-y-50: -118px;
+    --jump-y-70: -86px;
+    --jump-y-85: -36px;
+
+    --ground-height: 81px;
+    --ground-tile-width: 455.62px;
+    --ground-scroll-distance: -455.62px;
+
+    --obstacle-bottom: 58px;
+
+    --plant-width: 61px;
+    --plant-height: 65px;
+
+    --mushroom-width: 54px;
+    --mushroom-height: 56px;
+
+    --rock-width: 61px;
+    --rock-height: 50px;
+
+    --coin-size: 34px;
+    --coin-bottom: 88px;
+    --jump-duration: 1100ms;
+    --mountain-height: 158px;
+    --mountain-tile-width: 459.5px;
+    --mountain-scroll-distance: -459.5px;
+}
+
+/* Smaller clouds on phones */
+
+.cloud-one {
+    transform: scale(0.85);
+}
+
+.cloud-two {
+    transform: scale(0.65);
+}
+
+.cloud-three {
+    transform: scale(0.95);
+}
+
+    /* Character */
+
+    .cat {
+        left: 20px;
+    }
+
+    /* Start screen */
+
+    .start-screen {
+        width: calc(100% - 28px);
+        padding: 22px 18px;
+        gap: 12px;
+    }
+
+    .start-screen h2 {
+        font-size: 24px;
+    }
+
+    .start-screen p {
+        font-size: 14px;
+    }
+
+    .start-screen button {
+        padding: 12px 26px;
+    }
+
+    /* Instructions */
+
+    .instructions {
+        margin-top: 14px;
+        padding: 0 10px;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .desktop-instruction {
+        display: none;
+    }
+
+    .mobile-instruction {
+        display: inline;
+    }
+}
+
+/* SMALL PHONES */
+
+@media (max-width: 380px) {
+
+    .game-container {
+        width: calc(100% - 16px);
+    }
+
+    .game-header h1 {
+        font-size: 25px;
+    }
+
+    .score-board {
+        gap: 5px;
+    }
+
+    .score-board div {
+        padding: 8px 4px;
+    }
+
+    .score-board strong {
+        font-size: 17px;
+    }
+
+    .sound-toggle {
+        padding: 8px 9px;
+        font-size: 11px;
+    }
+    .game-area {
+    --cat-size: 96px;
+    --cat-bottom: 46px;
+
+    --idle-sheet-width: 480px;
+    --idle-frame-end: -480px;
+
+    --jump-sheet-width: 1248px;
+    --jump-frame-end: -1152px;
+
+    --jump-y-15: -28px;
+    --jump-y-30: -65px;
+    --jump-y-50: -102px;
+    --jump-y-70: -74px;
+    --jump-y-85: -31px;
+
+    --ground-height: 64px;
+    --ground-tile-width: 398.67px;
+    --ground-scroll-distance: -398.67px;
+
+    --obstacle-bottom: 46px;
+
+    --plant-width: 52px;
+    --plant-height: 55px;
+
+    --mushroom-width: 46px;
+    --mushroom-height: 48px;
+
+    --rock-width: 52px;
+    --rock-height: 43px;
+
+    --coin-size: 30px;
+    --coin-bottom: 76px;
+    --jump-duration: 1100ms;
+    --mountain-height: 135px;
+    --mountain-tile-width: 393.8px;
+    --mountain-scroll-distance: -393.8px;
+}
+
+.cloud-one {
+    transform: scale(0.7);
+}
+
+.cloud-two {
+    transform: scale(0.55);
+}
+
+.cloud-three {
+    transform: scale(0.8);
+}
+}
+
+@media (min-width: 681px) and (max-width: 900px) {
+    .game-area {
+        --cat-size: 140px;
+        --cat-bottom: 76px;
+
+        --idle-sheet-width: 700px;
+        --idle-frame-end: -700px;
+
+        --jump-sheet-width: 1820px;
+        --jump-frame-end: -1680px;
+
+        --ground-height: 81px;
+        --ground-tile-width: 576.65px;
+        --ground-scroll-distance: -576.65px;
+
+        --obstacle-bottom: 76px;
+
+        --plant-width: 77px;
+        --plant-height: 81px;
+
+        --mushroom-width: 68px;
+        --mushroom-height: 70px;
+
+        --rock-width: 77px;
+        --rock-height: 63px;
+
+        --coin-size: 43px;
+        --coin-bottom: 112px;
+        --jump-duration: 1000ms;
+
+        --mountain-height: 197px;
+        --mountain-tile-width: 574px;
+        --mountain-scroll-distance: -574px;
+    }
+}
+
+/* MOBILE LANDSCAPE (keep this LAST) */
+@media (orientation: landscape) and (max-height: 520px) {
+    body {
+        align-items: flex-start;
+        padding: 8px 0;
+    }
+
+    .game-container {
+        width: min(100% - 20px, 900px);
+    }
+
+    .game-header {
+        margin-bottom: 8px;
+    }
+
+    .game-header h1 {
+        font-size: 24px;
+    }
+
+    .score-board div {
+        padding: 6px 10px;
+    }
+
+    .score-board strong {
+        font-size: 17px;
+    }
+
+    .game-area {
+        height: min(260px, calc(100svh - 145px));
+        min-height: 240px;
+
+        --cat-size: 96px;
+        --cat-bottom: 46px;
+        --idle-sheet-width: 480px;
+        --idle-frame-end: -480px;
+        --jump-sheet-width: 1248px;
+        --jump-frame-end: -1152px;
+        --ground-height: 64px;
+        --ground-tile-width: 398.67px;
+        --ground-scroll-distance: -398.67px;
+        --obstacle-bottom: 46px;
+        --plant-width: 52px;
+        --plant-height: 55px;
+        --mushroom-width: 46px;
+        --mushroom-height: 48px;
+        --rock-width: 52px;
+        --rock-height: 43px;
+        --coin-size: 30px;
+        --coin-bottom: 76px;
+        --jump-duration: 1100ms;
+        --mountain-height: 175px;
+        --mountain-tile-width: 509.09px;
+        --mountain-scroll-distance: -509.09px;
+    }
+
+    .instructions {
+        margin-top: 7px;
+    }
+
+    .start-screen {
+        padding: 14px;
+        gap: 8px;
+    }
 }

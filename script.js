@@ -5,6 +5,7 @@ const gameArea = document.querySelector(".game-area");
 const scoreElement = document.getElementById("score");
 const bestScoreElement = document.getElementById("best-score");
 const coinsElement = document.getElementById("coins");
+const soundToggle = document.getElementById("sound-toggle");
 
 
 const obstacleAssets = {
@@ -47,6 +48,11 @@ let coinsCollected = 0;
 let coinTimer = null;
 
 let jumpsCompleted = 0;
+let audioContext = null;
+let musicBuffer = null;
+let musicSource = null;
+let musicGain = null;
+let soundEnabled = true;
 
 bestScoreElement.textContent = bestScore;
 
@@ -80,6 +86,7 @@ startButton.addEventListener("click", (event) => {
 
     //start new game
     isPlaying = true;
+    startMusic();
     updateGroundSpeed();
     gameArea.classList.add("running");
     startScreen.classList.add("hidden");
@@ -97,6 +104,7 @@ function jump() {
 
     isJumping = true;
     cat.classList.add("jump");
+    playJumpSound();
 }
 
 document.addEventListener("keydown", (event) => {
@@ -104,10 +112,6 @@ document.addEventListener("keydown", (event) => {
         event.preventDefault();
         jump();
     }
-});
-
-gameArea.addEventListener("click", () => {
-    jump();
 });
 
 cat.addEventListener("animationend", (event) => {
@@ -139,7 +143,7 @@ function createObstacle() {
     const obstacle = document.createElement("div");
 
     obstacle.classList.add("obstacle", type);
-    obstacle.style.animationDuration = `${obstacleDuration}s`;
+    obstacle.style.animationDuration = `${getTravelTime()}s`;
 
     // creat img
     const image = document.createElement("img");
@@ -175,7 +179,7 @@ function createCoin() {
 
     coin.appendChild(image);
 
-    coin.style.animationDuration = `${obstacleDuration}s`;
+    coin.style.animationDuration = `${getTravelTime()}s`;
 
     gameArea.appendChild(coin);
 
@@ -189,13 +193,14 @@ function createCoin() {
 function checkCollision() {
     //cat's position and dimension
     const catBounds = cat.getBoundingClientRect();
+    const catScale = catBounds.width / 156;
     // Create a smaller hitbox for the cat
-    const catRect = {
-        left: catBounds.left + 34,
-        right: catBounds.right - 34,
-        top: catBounds.top + 28,
-        bottom: catBounds.bottom - 22
-    };
+   const catRect = {
+    left: catBounds.left + 34 * catScale,
+    right: catBounds.right - 34 * catScale,
+    top: catBounds.top + 28 * catScale,
+    bottom: catBounds.bottom - 22 * catScale
+};
 
     const obstacles = gameArea.querySelectorAll(".obstacle");
 
@@ -225,12 +230,15 @@ function checkCollision() {
 
     for (const coin of coins) {
         const bounds = coin.getBoundingClientRect();
+        const coinPaddingX = bounds.width * (4 / 48);
+        const coinPaddingY = bounds.height * (4 / 48);
+
         const coinRect = {
-            left: bounds.left + 4,
-            right: bounds.right - 4,
-            top: bounds.top + 4,
-            bottom: bounds.bottom - 4
-            };
+            left: bounds.left + coinPaddingX,
+            right: bounds.right - coinPaddingX,
+            top: bounds.top + coinPaddingY,
+            bottom: bounds.bottom - coinPaddingY
+        };
         
          // Check whether the cat touches the coin
         const collected =
@@ -244,6 +252,7 @@ function checkCollision() {
             coinsCollected += 1;
             coinsElement.textContent = coinsCollected;
             addScore(2);
+            playCoinSound();
         }
     }
 }
@@ -251,6 +260,8 @@ function checkCollision() {
 
 function endGame() {
     isPlaying = false;
+    stopMusic();
+    playGameOverSound();
     gameArea.classList.remove("running");
     clearInterval(obstacleTimer);
     clearInterval(collisionTimer);
@@ -284,20 +295,268 @@ function addScore(points=1) {
     }
 }
 
+const REFERENCE_DISTANCE = 1180;
+
+function getTravelTime() {
+    const distance = gameArea.clientWidth + 80;
+    const scale = Math.sqrt(Math.min(1, distance / REFERENCE_DISTANCE));
+    return obstacleDuration * scale;
+}
+
 
 function updateGroundSpeed() {
-
-    const groundTileWidth = 640.72;
-
-    // Distance an obstacle travels across the game
+    const styles = getComputedStyle(gameArea);
+    const travelTime = getTravelTime();
     const obstacleDistance = gameArea.clientWidth + 80;
 
-    // Keep ground speed proportional to obstacle speed
-    const groundDuration =
-        (groundTileWidth * obstacleDuration) / obstacleDistance;
+    const groundTileWidth = parseFloat(
+        styles.getPropertyValue("--ground-tile-width")
+    ) || 640.72;
 
-    gameArea.style.setProperty(
-        "--ground-duration",
-        `${groundDuration}s`
-    );
+    const mountainTileWidth = parseFloat(
+        styles.getPropertyValue("--mountain-tile-width")
+    ) || 640;
+
+    const groundDuration = (groundTileWidth * travelTime) / obstacleDistance;
+
+    // Mountains move at 25% of obstacle speed
+    const mountainDuration = (mountainTileWidth * travelTime * 4) / obstacleDistance;
+
+    gameArea.style.setProperty("--ground-duration", `${groundDuration}s`);
+    gameArea.style.setProperty("--mountain-duration", `${mountainDuration}s`);
 }
+
+window.addEventListener("resize", updateGroundSpeed);
+
+gameArea.addEventListener("pointerdown", () => {
+    jump();
+});
+
+// ---------- MUSIC -----------//
+function createMusicBuffer(context) {
+    const bpm = 108;
+    const beat = 60 / bpm;
+    const loopDuration = beat * 8;
+    const sampleRate = context.sampleRate;
+    const frameCount = Math.ceil(loopDuration * sampleRate);
+
+    const buffer = context.createBuffer(1, frameCount, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    function addNote(frequency, startBeat, durationBeats, volume) {
+     const startFrame = Math.floor(
+            startBeat * beat * sampleRate
+        );
+
+        const noteFrames = Math.floor(
+            durationBeats * beat * sampleRate
+        );
+
+        for (let i = 0; i < noteFrames; i++) {
+
+            const index = startFrame + i;
+
+            if (index >= frameCount) break;
+
+            const time = i / sampleRate;
+            const duration = noteFrames / sampleRate;
+
+            // Fade the note in and out
+            const attack = Math.min(1, time / 0.02);
+            const release = Math.min(1, (duration - time) / 0.08);
+
+            const envelope = Math.max(
+                0,
+                Math.min(attack, release)
+            );
+
+            const wave =
+                Math.sin(2 * Math.PI * frequency * time) +
+                0.18 * Math.sin(2 * Math.PI * frequency * 2 * time);
+
+            data[index] += wave * volume * envelope;
+        }
+    }
+
+    // Original eight-note melody
+    const melody = [
+        523.25, 659.25, 783.99, 659.25,
+        587.33, 698.46, 880.00, 783.99
+    ];
+
+    melody.forEach((frequency, index) => {
+        addNote(frequency, index, 0.72, 0.25);
+    });
+
+    // Soft bass notes underneath the melody
+    const bass = [130.81, 146.83, 164.81, 146.83];
+
+    bass.forEach((frequency, index) => {
+        addNote(frequency, index * 2, 1.7, 0.12);
+    });
+
+    return buffer;
+}
+
+
+function initialiseAudio() {
+
+    if (audioContext) return true;
+
+    const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) {
+        console.error("Web Audio is not supported.");
+        return false;
+    }
+
+    audioContext = new AudioContextClass();
+
+    musicGain = audioContext.createGain();
+    musicGain.gain.value = 0.0001;
+
+    musicGain.connect(audioContext.destination);
+
+    musicBuffer = createMusicBuffer(audioContext);
+
+    return true;
+}
+
+
+function startMusic() {
+
+    if (!soundEnabled || !initialiseAudio()) return;
+
+    if (audioContext.state === "suspended") {
+        audioContext.resume();
+    }
+
+    // Avoid starting duplicate music tracks
+    if (musicSource) return;
+
+    const source = audioContext.createBufferSource();
+
+    source.buffer = musicBuffer;
+    source.loop = true;
+
+    source.connect(musicGain);
+
+    musicSource = source;
+
+    // Fade in the background music
+    const now = audioContext.currentTime;
+
+    musicGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setValueAtTime(0.0001, now);
+    musicGain.gain.linearRampToValueAtTime(0.15, now + 0.5);
+
+    source.start(now);
+}
+
+function stopMusic() {
+
+    if (!musicSource) return;
+
+    musicSource.stop();
+    musicSource = null;
+
+    const now = audioContext.currentTime;
+
+    musicGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setValueAtTime(0.0001, now);
+}
+
+
+
+function playTone(
+    frequency,
+    delay = 0,
+    duration = 0.18,
+    volume = 0.08,
+    type = "sine",
+    endFrequency = null
+) {
+
+    if (!soundEnabled || !audioContext) return;
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    const startTime = audioContext.currentTime + delay;
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, startTime);
+
+    if (endFrequency) {
+        oscillator.frequency.exponentialRampToValueAtTime(
+            endFrequency,
+            startTime + duration
+        );
+    }
+
+    // Fade sound in and out
+    gain.gain.setValueAtTime(0.0001, startTime);
+
+    gain.gain.exponentialRampToValueAtTime(
+        volume,
+        startTime + 0.015
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        startTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration + 0.02);
+}
+
+
+function playJumpSound() {
+
+    playTone(480, 0, 0.18, 0.07, "triangle", 760);
+}
+
+function playCoinSound() {
+
+    // First chime
+    playTone(880, 0, 0.13, 0.08, "sine", 1200);
+
+    // Second, higher chime
+    playTone(1320, 0.09, 0.18, 0.06, "sine", 1500);
+}
+
+function playGameOverSound() {
+
+    // Three descending notes
+    playTone(440, 0, 0.22, 0.075, "triangle", 330);
+
+    playTone(330, 0.16, 0.24, 0.065, "triangle", 247);
+
+    playTone(247, 0.34, 0.38, 0.055, "triangle", 185);
+}
+
+soundToggle.addEventListener("click", () => {
+
+    soundEnabled = !soundEnabled;
+
+    soundToggle.textContent = soundEnabled
+        ? "Sound: ON"
+        : "Sound: OFF";
+
+    soundToggle.setAttribute(
+        "aria-pressed",
+        String(soundEnabled)
+    );
+
+    if (soundEnabled && isPlaying) {
+        startMusic();
+    } else if (!soundEnabled) {
+        stopMusic();
+    }
+    soundToggle.blur();
+});
